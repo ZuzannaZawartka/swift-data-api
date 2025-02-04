@@ -1,11 +1,10 @@
-# Użyj oficjalnego obrazu JDK jako bazowego
 FROM openjdk:17-jdk-alpine
+ARG JAR_FILE=target/swift-data-api-0.0.1-SNAPSHOT.jar
 
-# Ustaw katalog roboczy w kontenerze
-ARG JAR_FILE=target/*.jar
+# Skopiowanie aplikacji
+COPY ${JAR_FILE} app.jar
 
-# Skopiuj plik JAR aplikacji do kontenera
-COPY ./target/swift-data-api-0.0.1-SNAPSHOT.jar app.jar
+# Skopiowanie pliku Excel do odpowiedniego katalogu w obrazie
+COPY src/main/resources/Interns_2025_SWIFT_CODES.xlsx /src/main/resources/
 
-# Uruchom aplikację
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","/app.jar"]
