@@ -1,6 +1,6 @@
 package com.example.swiftdataapi.dto;
 
-public class BranchDTO {
+public class BranchListDTO {
 
     private String address;
     private String bankName;
@@ -10,7 +10,7 @@ public class BranchDTO {
 
 
     // Konstruktor
-    public BranchDTO(String address, String bankName, String countryISO2, boolean isHeadquarter, String swiftCode) {
+    public BranchListDTO(String address, String bankName, String countryISO2, boolean isHeadquarter, String swiftCode) {
         this.address = address;
         this.bankName = bankName;
         this.countryISO2 = countryISO2;

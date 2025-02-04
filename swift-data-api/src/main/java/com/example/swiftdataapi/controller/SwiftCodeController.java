@@ -1,6 +1,5 @@
 package com.example.swiftdataapi.controller;
 
-import com.example.swiftdataapi.dto.SwiftCodeResponseDTO;
 import com.example.swiftdataapi.model.SwiftCodeEntity;
 import com.example.swiftdataapi.service.SwiftTableManager;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +26,16 @@ public class SwiftCodeController {
         return ResponseEntity.ok("Dane zostały załadowane.");
     }
 
-    @GetMapping("/swift-codes")
-    public ResponseEntity<List<SwiftCodeEntity>> getAllSwiftCodes() {
-        List<SwiftCodeEntity> swiftCodes = swiftTableManager.getAllSwiftCodes();
-        return ResponseEntity.ok(swiftCodes);
+    @GetMapping("/country/{countryISO2code}")
+    public ResponseEntity<Object> getSwiftCodeForCountry(@PathVariable("countryISO2code") String countryISO2code) {
+        return ResponseEntity.ok(swiftTableManager.getSwiftCodesForCountry(countryISO2code));
     }
+
 
     @GetMapping("/{swiftCode}")
     public ResponseEntity<Object> getSwiftCodeDetails(@PathVariable("swiftCode") String swiftCode) {
+
         return ResponseEntity.ok(swiftTableManager.getSwiftCodeDetails(swiftCode));
     }
+
 }

@@ -1,7 +1,5 @@
 package com.example.swiftdataapi.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.util.List;
 
 public class SwiftCodeResponseDTO {
@@ -12,10 +10,10 @@ public class SwiftCodeResponseDTO {
     private String countryName;
     private boolean isHeadquarter;
     private String swiftCode;
-    private List<BranchDTO> branches;
+    private List<BranchListDTO> branches;
 
 
-    public SwiftCodeResponseDTO(String address, String bankName, String countryISO2, String countryName, boolean isHeadquarter, String swiftCode, List<BranchDTO> branches) {
+    public SwiftCodeResponseDTO(String address, String bankName, String countryISO2, String countryName, boolean isHeadquarter, String swiftCode, List<BranchListDTO> branches) {
         this.address = address;
         this.bankName = bankName;
         this.countryISO2 = countryISO2;
@@ -74,11 +72,11 @@ public class SwiftCodeResponseDTO {
         this.swiftCode = swiftCode;
     }
 
-    public List<BranchDTO> getBranches() {
+    public List<BranchListDTO> getBranches() {
         return branches;
     }
 
-    public void setBranches(List<BranchDTO> branches) {
+    public void setBranches(List<BranchListDTO> branches) {
         this.branches = branches;
     }
 }

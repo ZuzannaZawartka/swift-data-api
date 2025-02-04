@@ -1,8 +1,9 @@
 package com.example.swiftdataapi.service;
 
-import com.example.swiftdataapi.dto.BranchDTO;
+import com.example.swiftdataapi.dto.BranchListDTO;
 import com.example.swiftdataapi.dto.BranchSwiftCodeDTO;
 import com.example.swiftdataapi.dto.SwiftCodeResponseDTO;
+import com.example.swiftdataapi.dto.endpoint2.CountrySwiftCodesResponseDTO;
 import com.example.swiftdataapi.model.SwiftCodeEntity;
 import com.example.swiftdataapi.repository.SwiftCodeRepository;
 import org.apache.poi.ss.usermodel.*;
@@ -103,10 +104,10 @@ public class SwiftTableManager {
                 .orElseThrow(() -> new IllegalArgumentException("SWIFT code not found: " + swiftCode));
 
         if (mainEntity.isHeadquarter()) {
-            List<BranchDTO> branches = swiftCodeRepository.findAll().stream()
+            List<BranchListDTO> branches = swiftCodeRepository.findAll().stream()
                     .filter(entity -> entity.getSwiftCode().startsWith(mainEntity.getSwiftCode().substring(0, 8))
                             && !entity.getSwiftCode().equals(mainEntity.getSwiftCode()))  // Wyklucz siedzibę główną
-                    .map(entity -> new BranchDTO(
+                    .map(entity -> new BranchListDTO(
                             entity.getAddress(),
                             entity.getBankName(),
                             entity.getCountryISO2(),
@@ -137,6 +138,54 @@ public class SwiftTableManager {
             );
         }
     }
+
+
+//    public BranchListDTO getSwiftCodesForCountry(String countryISO2code) {
+//        System.out.println("Szukam jednego rekordu dla kraju: " + countryISO2code);
+//
+//        List<SwiftCodeEntity> entities = swiftCodeRepository.findAllByCountryISO2(countryISO2code.toUpperCase());
+//
+//        if (entities.isEmpty()) {
+//            throw new IllegalArgumentException("No SWIFT codes found for country ISO2 code: " + countryISO2code);
+//        }
+//
+//        // Pobierz pierwszy element z listy (lub możesz użyć losowego)
+//        SwiftCodeEntity entity = entities.get(0);
+//
+//        return new BranchListDTO(
+//                entity.getAddress(),
+//                entity.getBankName(),
+//                entity.getCountryISO2(),
+//                entity.isHeadquarter(),
+//                entity.getSwiftCode()
+//        );
+//    }
+
+    public CountrySwiftCodesResponseDTO getSwiftCodesForCountry(String countryISO2code) {
+        System.out.println("Szukam danych dla kraju: " + countryISO2code);
+
+        List<SwiftCodeEntity> entities = swiftCodeRepository.findAllByCountryISO2(countryISO2code.toUpperCase());
+
+        if (entities.isEmpty()) {
+            throw new IllegalArgumentException("No SWIFT codes found for country ISO2 code: " + countryISO2code);
+        }
+
+        String countryName = entities.get(0).getCountryName(); // Pobieramy nazwę kraju
+
+        List<BranchListDTO> swiftCodes = entities.stream()
+                .map(entity -> new BranchListDTO(
+                        entity.getAddress(),
+                        entity.getBankName(),
+                        entity.getCountryISO2(),
+                        entity.isHeadquarter(),
+                        entity.getSwiftCode()
+                ))
+                .collect(Collectors.toList());
+
+        // Zwracamy CountrySwiftCodesResponseDTO, który ma strukturę zgodną z JSON-em
+        return new CountrySwiftCodesResponseDTO(countryISO2code.toUpperCase(), countryName, swiftCodes);
+    }
+
 
 
     public void clearSwiftCodesTable() {
