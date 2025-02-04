@@ -1,12 +1,10 @@
 package com.example.swiftdataapi.controller;
 
+import com.example.swiftdataapi.dto.BranchSwiftCodeDTO;
 import com.example.swiftdataapi.model.SwiftCodeEntity;
 import com.example.swiftdataapi.service.SwiftTableManager;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,11 +29,16 @@ public class SwiftCodeController {
         return ResponseEntity.ok(swiftTableManager.getSwiftCodesForCountry(countryISO2code));
     }
 
-
     @GetMapping("/{swiftCode}")
     public ResponseEntity<Object> getSwiftCodeDetails(@PathVariable("swiftCode") String swiftCode) {
-
         return ResponseEntity.ok(swiftTableManager.getSwiftCodeDetails(swiftCode));
     }
+
+    @PostMapping("/")
+    public ResponseEntity<SwiftCodeEntity> addSwiftCode(@RequestBody BranchSwiftCodeDTO requestDTO) {
+        SwiftCodeEntity savedEntity = swiftTableManager.addSwiftCode(requestDTO);
+        return ResponseEntity.ok(savedEntity);
+    }
+
 
 }

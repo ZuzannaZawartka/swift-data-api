@@ -17,30 +17,23 @@ public class SwiftCodeEntity {
 
     private String countryISO2;
     private String swiftCode;
-    private String codeType;
     private String bankName;
     private String address;
-    private String townName;
     private String countryName;
-    private String timeZone;
     private boolean isHeadquarter;
 
     // Konstruktor bezargumentowy wymagany przez JPA
     public SwiftCodeEntity() {}
 
-    // Konstruktor ze wszystkimi polami
-    public SwiftCodeEntity(Long id, String countryISO2, String swiftCode, String codeType,
-                           String bankName, String address, String townName,
-                           String countryName, String timeZone, boolean isHeadquarter) {
+    // Konstruktor ze wszystkimi polami (bez codeType, townName, timeZone)
+    public SwiftCodeEntity(Long id, String countryISO2, String swiftCode, String bankName,
+                           String address, String countryName, boolean isHeadquarter) {
         this.id = id;
         this.countryISO2 = countryISO2;
         this.swiftCode = swiftCode;
-        this.codeType = codeType;
         this.bankName = bankName;
         this.address = address;
-        this.townName = townName;
         this.countryName = countryName;
-        this.timeZone = timeZone;
         this.isHeadquarter = isHeadquarter;
     }
 
@@ -69,14 +62,6 @@ public class SwiftCodeEntity {
         this.swiftCode = swiftCode;
     }
 
-    public String getCodeType() {
-        return codeType;
-    }
-
-    public void setCodeType(String codeType) {
-        this.codeType = codeType;
-    }
-
     public String getBankName() {
         return bankName;
     }
@@ -93,28 +78,12 @@ public class SwiftCodeEntity {
         this.address = address;
     }
 
-    public String getTownName() {
-        return townName;
-    }
-
-    public void setTownName(String townName) {
-        this.townName = townName;
-    }
-
     public String getCountryName() {
         return countryName;
     }
 
     public void setCountryName(String countryName) {
         this.countryName = countryName;
-    }
-
-    public String getTimeZone() {
-        return timeZone;
-    }
-
-    public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
     }
 
     public boolean isHeadquarter() {
@@ -132,12 +101,9 @@ public class SwiftCodeEntity {
                 "id=" + id +
                 ", countryISO2='" + countryISO2 + '\'' +
                 ", swiftCode='" + swiftCode + '\'' +
-                ", codeType='" + codeType + '\'' +
                 ", bankName='" + bankName + '\'' +
                 ", address='" + address + '\'' +
-                ", townName='" + townName + '\'' +
                 ", countryName='" + countryName + '\'' +
-                ", timeZone='" + timeZone + '\'' +
                 ", isHeadquarter=" + isHeadquarter +
                 '}';
     }
@@ -152,17 +118,14 @@ public class SwiftCodeEntity {
                 Objects.equals(id, that.id) &&
                 Objects.equals(countryISO2, that.countryISO2) &&
                 Objects.equals(swiftCode, that.swiftCode) &&
-                Objects.equals(codeType, that.codeType) &&
                 Objects.equals(bankName, that.bankName) &&
                 Objects.equals(address, that.address) &&
-                Objects.equals(townName, that.townName) &&
-                Objects.equals(countryName, that.countryName) &&
-                Objects.equals(timeZone, that.timeZone);
+                Objects.equals(countryName, that.countryName);
     }
 
     // Metoda hashCode
     @Override
     public int hashCode() {
-        return Objects.hash(id, countryISO2, swiftCode, codeType, bankName, address, townName, countryName, timeZone, isHeadquarter);
+        return Objects.hash(id, countryISO2, swiftCode, bankName, address, countryName, isHeadquarter);
     }
 }

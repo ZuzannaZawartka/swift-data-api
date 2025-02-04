@@ -15,6 +15,7 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+//        swiftTableManager.clearSwiftCodesTable();
         // Wywołanie metody wczytującej dane z Excela
         swiftTableManager.loadSwiftDataFromExcel("src/main/resources/Interns_2025_SWIFT_CODES.xlsx");
     }
