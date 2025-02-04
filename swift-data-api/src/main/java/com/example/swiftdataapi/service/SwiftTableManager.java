@@ -169,6 +169,11 @@ public class SwiftTableManager {
             throw new IllegalArgumentException("SWIFT code already exists for this bank in this country.");
         }
 
+        // Walidacja: jeśli isHeadquarter == true, to kod SWIFT musi kończyć się na "XXX"
+        if (requestDTO.isHeadquarter() && !requestDTO.getSwiftCode().endsWith("XXX")) {
+            throw new IllegalArgumentException("SWIFT code for headquarter must end with 'XXX'.");
+        }
+
         // Tworzenie nowego obiektu encji
         SwiftCodeEntity newEntry = new SwiftCodeEntity(
                 null,
@@ -183,6 +188,7 @@ public class SwiftTableManager {
         // Zapis do bazy
         return swiftCodeRepository.save(newEntry);
     }
+
 
 
 

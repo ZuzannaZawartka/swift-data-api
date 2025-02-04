@@ -6,7 +6,9 @@ import com.example.swiftdataapi.service.SwiftTableManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/swift-codes")
@@ -35,10 +37,23 @@ public class SwiftCodeController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<SwiftCodeEntity> addSwiftCode(@RequestBody BranchSwiftCodeDTO requestDTO) {
-        SwiftCodeEntity savedEntity = swiftTableManager.addSwiftCode(requestDTO);
-        return ResponseEntity.ok(savedEntity);
+    public ResponseEntity<Map<String, String>> addSwiftCode(@RequestBody BranchSwiftCodeDTO requestDTO) {
+        Map<String, String> response = new HashMap<>();
+
+        try {
+            // Wywołanie metody w serwisie, aby dodać kod SWIFT
+            SwiftCodeEntity savedEntity = swiftTableManager.addSwiftCode(requestDTO);
+
+            // Zwrócenie komunikatu o sukcesie
+            response.put("message", "SWIFT code successfully added.");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            // Jeśli wystąpił błąd (np. kod SWIFT nie kończy się na "XXX"), zwrócenie błędu
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
+
 
 
 }
