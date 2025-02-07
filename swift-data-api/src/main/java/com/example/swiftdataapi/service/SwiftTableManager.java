@@ -26,6 +26,10 @@ public class SwiftTableManager {
         this.swiftCodeRepository = swiftCodeRepository;
     }
 
+    /**
+     * Loads SWIFT data from an Excel file and stores it in the database.
+     * @param filePath Path to the Excel file
+     */
     public void loadSwiftDataFromExcel(String filePath) {
         List<SwiftCodeEntity> swiftCodeEntities = new ArrayList<>();
 
@@ -34,28 +38,27 @@ public class SwiftTableManager {
             Sheet sheet = workbook.getSheetAt(0);
 
             Iterator<Row> rowIterator = sheet.iterator();
-            rowIterator.next();  // Pomiń nagłówek
+            rowIterator.next();  // Skip header row
 
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
 
-                // Pobierz wartości z wiersza
+                // Extract values from each row
                 String countryISO2 = getCellValue(row, 0).toUpperCase();
                 String swiftCode = getCellValue(row, 1);
                 String bankName = getCellValue(row, 3);
                 String address = getCellValue(row, 4);
                 String countryName = getCellValue(row, 6).toUpperCase();
 
-                // Sprawdzenie, czy to jest główna siedziba
+                // Check if this is a headquarter
                 boolean isHeadquarter = swiftCode.endsWith("XXX");
 
-                // Sprawdź, czy identyczny rekord już istnieje w bazie
+                // Check if the record already exists
                 boolean exists = swiftCodeRepository.findBySwiftCodeAndBankNameAndCountryISO2(swiftCode, bankName, countryISO2).isPresent();
 
                 if (!exists) {
-                    // Utwórz obiekt encji z nowymi danymi tylko jeśli rekord nie istnieje
                     SwiftCodeEntity entity = new SwiftCodeEntity(
-                            null,  // ID - generowane automatycznie
+                            null,  // ID is generated automatically
                             countryISO2,
                             swiftCode,
                             bankName,
@@ -63,51 +66,56 @@ public class SwiftTableManager {
                             countryName,
                             isHeadquarter
                     );
-
                     swiftCodeEntities.add(entity);
                 }
             }
 
-            // Zapisz nowe dane do bazy danych
+            // Save new records to the database
             if (!swiftCodeEntities.isEmpty()) {
                 swiftCodeRepository.saveAll(swiftCodeEntities);
-                System.out.println("Nowe dane SWIFT zostały pomyślnie załadowane do bazy danych.");
+                System.out.println("New SWIFT data has been successfully loaded into the database.");
             } else {
-                System.out.println("Nie znaleziono nowych danych do załadowania.");
+                System.out.println("No new data to load.");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Błąd podczas ładowania danych SWIFT: " + e.getMessage(), e);
+            throw new RuntimeException("Error while loading SWIFT data: " + e.getMessage(), e);
         }
     }
-
-
 
     private String getCellValue(Row row, int cellIndex) {
         Cell cell = row.getCell(cellIndex);
         return cell != null ? cell.toString().trim() : "";
     }
 
+    /**
+     * Retrieves all SWIFT codes from the database.
+     * @return List of all SwiftCodeEntity records
+     */
     public List<SwiftCodeEntity> getAllSwiftCodes() {
         return swiftCodeRepository.findAll();
     }
 
+    /**
+     * Retrieves SWIFT code details including branches if it's a headquarter.
+     * @param swiftCode The SWIFT code to retrieve
+     * @return SwiftCodeResponseDTO for headquarter or BranchSwiftCodeDTO for a branch
+     */
     public Object getSwiftCodeDetails(String swiftCode) {
-        // Znajdź główną encję (headquarter lub branch)
         Optional<SwiftCodeEntity> mainEntityOpt = swiftCodeRepository.findBySwiftCode(swiftCode);
 
         if (mainEntityOpt.isEmpty()) {
-            // Jeśli kod SWIFT nie istnieje, rzucamy wyjątek z informacją
             throw new IllegalArgumentException("SWIFT code not found: " + swiftCode);
         }
 
         SwiftCodeEntity mainEntity = mainEntityOpt.get();
 
         if (mainEntity.getHeadquarter()) {
+            // Get branches for headquarter
             List<BranchListDTO> branches = swiftCodeRepository.findAll().stream()
-                    .filter(entity -> entity.getSwiftCode().startsWith(mainEntity.getSwiftCode().substring(0, 8))
-                            && !entity.getSwiftCode().equals(mainEntity.getSwiftCode()))  // Ensure the headquarter is excluded
+                    .filter(entity -> entity.getSwiftCode().startsWith(mainEntity.getSwiftCode().substring(0, 8)) &&
+                            !entity.getSwiftCode().equals(mainEntity.getSwiftCode()))  // Exclude the main entity
                     .map(entity -> new BranchListDTO(
                             entity.getAddress(),
                             entity.getBankName(),
@@ -126,9 +134,8 @@ public class SwiftTableManager {
                     mainEntity.getSwiftCode(),
                     branches
             );
-        }
-        else {
-            // Zwróć DTO dla zwykłego oddziału bez branches
+        } else {
+            // Return branch information if it's not a headquarter
             return new BranchSwiftCodeDTO(
                     mainEntity.getAddress(),
                     mainEntity.getBankName(),
@@ -140,7 +147,11 @@ public class SwiftTableManager {
         }
     }
 
-
+    /**
+     * Retrieves SWIFT codes for a specific country.
+     * @param countryISO2code Country ISO2 code
+     * @return CountrySwiftCodesResponseDTO containing the country's SWIFT codes
+     */
     public CountrySwiftCodesResponseDTO getSwiftCodesForCountry(String countryISO2code) {
         List<SwiftCodeEntity> entities = swiftCodeRepository.findAllByCountryISO2(countryISO2code.toUpperCase());
 
@@ -148,7 +159,7 @@ public class SwiftTableManager {
             throw new IllegalArgumentException("No SWIFT codes found for country ISO2 code: " + countryISO2code);
         }
 
-        String countryName = entities.get(0).getCountryName(); // Pobieramy nazwę kraju
+        String countryName = entities.get(0).getCountryName(); // Get country name from the first entity
 
         List<BranchListDTO> swiftCodes = entities.stream()
                 .map(entity -> new BranchListDTO(
@@ -160,16 +171,17 @@ public class SwiftTableManager {
                 ))
                 .collect(Collectors.toList());
 
-        // Zwracamy CountrySwiftCodesResponseDTO, który ma strukturę zgodną z JSON-em
         return new CountrySwiftCodesResponseDTO(countryISO2code.toUpperCase(), countryName, swiftCodes);
     }
 
+    /**
+     * Adds a new SWIFT code entry.
+     * @param requestDTO Data transfer object containing SWIFT code details
+     * @return The newly added SwiftCodeEntity
+     */
     public SwiftCodeEntity addSwiftCode(BranchSwiftCodeDTO requestDTO) {
 
-        System.out.println("Request DTO: " + requestDTO);
-        System.out.println("Is Headquarter: " + requestDTO.getHeadquarter());
-
-        // Sprawdzenie, czy wpis już istnieje
+        // Check if the SWIFT code already exists in the database
         boolean exists = swiftCodeRepository.findBySwiftCodeAndBankNameAndCountryISO2(
                 requestDTO.getSwiftCode(),
                 requestDTO.getBankName(),
@@ -177,22 +189,21 @@ public class SwiftTableManager {
         ).isPresent();
 
         if (exists) {
-            throw new IllegalArgumentException("SWIFT code already exists for this bank in this country." + requestDTO.getHeadquarter());
+            throw new IllegalArgumentException("SWIFT code already exists for this bank and country.");
         }
 
+        // Validation: If it's a headquarter, the code must end with "XXX"
         if (requestDTO.getSwiftCode().endsWith("XXX")) {
-            // If it's marked as a branch (headquarter = false), it's invalid
             if (!requestDTO.getHeadquarter()) {
-                throw new IllegalArgumentException("A SWIFT code  a jest  "+ requestDTO.getHeadquarter()+" ending with 'XXX' must be a headquarter, not a branch.");
+                throw new IllegalArgumentException("SWIFT code ending with 'XXX' must be for a headquarter.");
             }
         } else {
-            // Case 2: If the SWIFT code does not end with 'XXX', it must **not** be a headquarter
             if (requestDTO.getHeadquarter()) {
-                throw new IllegalArgumentException("SWIFT code "+ requestDTO.getHeadquarter()+" for headquarter must end with 'XXX'.");
+                throw new IllegalArgumentException("SWIFT code for headquarter must end with 'XXX'.");
             }
         }
 
-        // For branch, check if the first 8 characters match a headquarter
+        // Validation for branch: Check if a matching headquarter exists
         if (!requestDTO.getHeadquarter()) {
             String headquarterPrefix = requestDTO.getSwiftCode().substring(0, 8);
             boolean hasMatchingHeadquarter = swiftCodeRepository.findBySwiftCode(headquarterPrefix + "XXX").isPresent();
@@ -202,7 +213,7 @@ public class SwiftTableManager {
             }
         }
 
-        // Tworzenie nowego obiektu encji
+        // Create a new SwiftCodeEntity and save it to the database
         SwiftCodeEntity newEntry = new SwiftCodeEntity(
                 null,
                 requestDTO.getCountryISO2(),
@@ -213,38 +224,43 @@ public class SwiftTableManager {
                 requestDTO.getHeadquarter()
         );
 
-        // Zapis do bazy
         return swiftCodeRepository.save(newEntry);
     }
 
-
+    /**
+     * Deletes a SWIFT code from the database.
+     * @param swiftCode SWIFT code to delete
+     * @param bankName Bank name associated with the SWIFT code
+     * @param countryISO2 Country ISO2 code
+     * @return Message indicating success or failure
+     */
     public String deleteSwiftCode(String swiftCode, String bankName, String countryISO2) {
-        // Sprawdzanie, czy rekord istnieje w bazie danych
         SwiftCodeEntity swiftCodeEntity = swiftCodeRepository.findBySwiftCodeAndBankNameAndCountryISO2(
                 swiftCode, bankName, countryISO2
         ).orElseThrow(() -> new IllegalArgumentException("SWIFT code not found for the given bank and country"));
 
-        // Sprawdzanie, czy kod SWIFT należy do głównej siedziby
         if (swiftCodeEntity.getHeadquarter()) {
-            // Sprawdzanie, czy istnieją pododdziały (branches)
+            // Check if there are any associated branches
             boolean hasBranches = swiftCodeRepository.findAll().stream()
-                    .anyMatch(entity -> entity.getSwiftCode().startsWith(swiftCode.substring(0, 8))
-                            && !entity.getSwiftCode().equals(swiftCode));
+                    .anyMatch(entity -> entity.getSwiftCode().startsWith(swiftCode.substring(0, 8)) &&
+                            !entity.getSwiftCode().equals(swiftCode));
 
             if (hasBranches) {
-                throw new IllegalArgumentException("Cannot delete this SWIFT code as it has associated branches.");
+                throw new IllegalArgumentException("Cannot delete headquarter SWIFT code as it has associated branches.");
             }
         }
 
-        // Usuwanie rekordu z bazy
+        // Delete the record
         swiftCodeRepository.delete(swiftCodeEntity);
 
         return "SWIFT code successfully deleted.";
     }
 
+    /**
+     * Clears all records from the swift_codes table.
+     */
     public void clearSwiftCodesTable() {
         swiftCodeRepository.deleteAll();
-        System.out.println("Tabela swift_codes została wyczyszczona.");
+        System.out.println("All records from swift_codes table have been cleared.");
     }
-
 }
