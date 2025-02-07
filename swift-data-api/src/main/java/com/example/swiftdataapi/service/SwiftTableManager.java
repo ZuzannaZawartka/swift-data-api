@@ -107,7 +107,7 @@ public class SwiftTableManager {
         if (mainEntity.getHeadquarter()) {
             List<BranchListDTO> branches = swiftCodeRepository.findAll().stream()
                     .filter(entity -> entity.getSwiftCode().startsWith(mainEntity.getSwiftCode().substring(0, 8))
-                            && !entity.getSwiftCode().equals(mainEntity.getSwiftCode()))  // Wyklucz siedzibę główną
+                            && !entity.getSwiftCode().equals(mainEntity.getSwiftCode()))  // Ensure the headquarter is excluded
                     .map(entity -> new BranchListDTO(
                             entity.getAddress(),
                             entity.getBankName(),
@@ -126,7 +126,8 @@ public class SwiftTableManager {
                     mainEntity.getSwiftCode(),
                     branches
             );
-        } else {
+        }
+        else {
             // Zwróć DTO dla zwykłego oddziału bez branches
             return new BranchSwiftCodeDTO(
                     mainEntity.getAddress(),
@@ -191,8 +192,6 @@ public class SwiftTableManager {
             }
         }
 
-
-
         // For branch, check if the first 8 characters match a headquarter
         if (!requestDTO.getHeadquarter()) {
             String headquarterPrefix = requestDTO.getSwiftCode().substring(0, 8);
@@ -242,8 +241,6 @@ public class SwiftTableManager {
 
         return "SWIFT code successfully deleted.";
     }
-
-
 
     public void clearSwiftCodesTable() {
         swiftCodeRepository.deleteAll();

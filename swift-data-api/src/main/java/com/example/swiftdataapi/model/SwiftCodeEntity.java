@@ -1,11 +1,9 @@
 package com.example.swiftdataapi.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.util.Objects;
+
 
 @Entity
 @Table(name = "swift_codes")
@@ -13,13 +11,25 @@ public class SwiftCodeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "countryISO2")
     private String countryISO2;
+
+    @Column(name = "swiftCode")
     private String swiftCode;
+
+    @Column(name = "bankName")
     private String bankName;
+
+    @Column(name = "address")
     private String address;
+
+    @Column(name = "countryName")
     private String countryName;
+
+    @Column(name = "isHeadquarter")
     private boolean isHeadquarter;
 
     // Konstruktor bezargumentowy wymagany przez JPA

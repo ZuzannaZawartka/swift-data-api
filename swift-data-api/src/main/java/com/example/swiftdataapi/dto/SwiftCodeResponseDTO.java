@@ -1,5 +1,7 @@
 package com.example.swiftdataapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class SwiftCodeResponseDTO {
@@ -8,6 +10,7 @@ public class SwiftCodeResponseDTO {
     private String bankName;
     private String countryISO2;
     private String countryName;
+    @JsonProperty("headquarter")
     private boolean isHeadquarter;
     private String swiftCode;
     private List<BranchListDTO> branches;

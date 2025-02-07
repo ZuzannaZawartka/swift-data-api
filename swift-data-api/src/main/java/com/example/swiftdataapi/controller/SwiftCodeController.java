@@ -42,7 +42,6 @@ public class SwiftCodeController {
         }
     }
 
-
     @PostMapping("/")
     public ResponseEntity<Map<String, String>> addSwiftCode(@RequestBody BranchSwiftCodeDTO requestDTO) {
         Map<String, String> response = new HashMap<>();

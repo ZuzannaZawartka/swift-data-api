@@ -1,11 +1,14 @@
 package com.example.swiftdataapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class BranchSwiftCodeDTO {
 
     private String address;
     private String bankName;
     private String countryISO2;
     private String countryName;
+    @JsonProperty("headquarter")
     private boolean isHeadquarter;
     private String swiftCode;
 
