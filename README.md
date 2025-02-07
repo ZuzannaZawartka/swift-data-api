@@ -42,32 +42,43 @@ The Swift Data API allows users to access and manage SWIFT codes stored in a dat
 
 ---
 
-#### **Endpoint 3: Add new SWIFT code entries to the database for a specific country**
+### Endpoint 3: Add New SWIFT Code
+**POST**: `/v1/swift-codes/`
 
-- **POST**: `/v1/swift-codes/`
+This endpoint adds a new SWIFT code entry to the database.
 
-   This endpoint allows you to add a new SWIFT code entry to the database for a specific country. 
+#### Request:
+- **swiftCode**: The SWIFT code (e.g., CUIMPLP1123).
+- **bankName**: Name of the bank.
+- **address**: Address of the bank.
+- **countryISO2**: 2-letter country code (e.g., PL for Poland).
+- **countryName**: Country name (e.g., Poland).
+- **headquarter**: `true` if it's a headquarter (`false` for a branch).
 
-   **Request**: 
-   - The request should include the SWIFT code details (address, bank name, country ISO2 code, etc.).
+#### Validation:
+- **Headquarter**: SWIFT code must end with `XXX` (e.g., CUIMPLPXXX). If `headquarter` is `true`, the code must end with `XXX`.
+- **Branch**: SWIFT code for branches must match a valid headquarter's SWIFT code (ending with `XXX`).
 
-   **Response**: 
-   - The response will confirm if the SWIFT code was successfully added to the database.
+#### Response:
+- **Success**: Confirms the SWIFT code is added.
+- **Error**: If the SWIFT code already exists or validation fails.
+
 
 ---
 
 ### Endpoint 4: Delete SWIFT Code
-
 This endpoint allows you to delete a specific SWIFT code from the database. The deletion is based on the provided SWIFT code, bank name, and country ISO2 code. The data will be removed only if all three parameters match an existing record in the database.
 
 #### **DELETE**: `/v1/swift-codes/{swift-code}`
 
 #### **Parameters:**
-
 - `swift-code` (Path Parameter): The SWIFT code that you wish to delete.
 - `bankName` (Query Parameter): The name of the bank associated with the SWIFT code.
 - `countryISO2` (Query Parameter): The ISO-2 code of the country where the bank is located.
 
+#### **Validation:**
+- **Headquarter Deletion**: If the SWIFT code belongs to a headquarter (indicated by `headquarter = true`), it cannot be deleted if there are associated branch SWIFT codes. A headquarter with related branches cannot be deleted until the branches are removed.
+  
 #### **Example Request:**
 http://localhost:8080/v1/swift-codes/CUIMPLP1XXX?bankName=AVIVA INVESTORS POLAND SPOLKA AKCYJNA W LIKWIDACJI&countryISO2=PL
 
