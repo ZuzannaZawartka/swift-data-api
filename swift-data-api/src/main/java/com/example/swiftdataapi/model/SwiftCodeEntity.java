@@ -86,7 +86,7 @@ public class SwiftCodeEntity {
         this.countryName = countryName;
     }
 
-    public boolean isHeadquarter() {
+    public boolean getHeadquarter() {
         return isHeadquarter;
     }
 

@@ -35,11 +35,13 @@ public class BranchSwiftCodeDTO {
         return countryName;
     }
 
-    public boolean isHeadquarter() {
+    public boolean getHeadquarter() {
         return isHeadquarter;
     }
 
     public String getSwiftCode() {
         return swiftCode;
     }
+
+
 }

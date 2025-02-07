@@ -43,7 +43,7 @@ public class BranchListDTO {
         this.countryISO2 = countryISO2;
     }
 
-    public boolean isHeadquarter() {
+    public boolean getHeadquarter() {
         return isHeadquarter;
     }
 

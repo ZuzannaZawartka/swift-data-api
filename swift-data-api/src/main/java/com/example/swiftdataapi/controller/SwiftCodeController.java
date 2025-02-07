@@ -5,6 +5,8 @@ import com.example.swiftdataapi.model.SwiftCodeEntity;
 import com.example.swiftdataapi.service.SwiftTableManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +35,13 @@ public class SwiftCodeController {
 
     @GetMapping("/{swiftCode}")
     public ResponseEntity<Object> getSwiftCodeDetails(@PathVariable("swiftCode") String swiftCode) {
-        return ResponseEntity.ok(swiftTableManager.getSwiftCodeDetails(swiftCode));
+        try {
+            return ResponseEntity.ok(swiftTableManager.getSwiftCodeDetails(swiftCode));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+        }
     }
+
 
     @PostMapping("/")
     public ResponseEntity<Map<String, String>> addSwiftCode(@RequestBody BranchSwiftCodeDTO requestDTO) {
@@ -54,6 +61,20 @@ public class SwiftCodeController {
         }
     }
 
+    @DeleteMapping("/{swift-code}")
+    public ResponseEntity<Map<String, String>> deleteSwiftCode(@PathVariable("swift-code") String swiftCode,
+                                                               @RequestParam("bankName") String bankName,
+                                                               @RequestParam("countryISO2") String countryISO2) {
+        try {
+            // Usuwanie wpisu z bazy danych
+            String message = swiftTableManager.deleteSwiftCode(swiftCode, bankName, countryISO2);
 
+            // Zwrócenie odpowiedzi z komunikatem
+            return ResponseEntity.ok(Map.of("message", message));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
 
 }
